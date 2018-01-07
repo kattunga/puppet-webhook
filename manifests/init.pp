@@ -67,7 +67,7 @@ class webhook (
   $repo_puppetfile = undef,
   $repo_hieradata  = undef,
   $ruby_dev        = 'ruby-dev',
-  @ruby_prefix     = '/usr/local/rvm/wrappers/ruby-2.2.6'
+  $ruby_prefix     = '/usr/local/rvm/wrappers/ruby-2.2.6'
 ) {
 
   file { "${webhook_home}":
