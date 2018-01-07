@@ -124,7 +124,7 @@ class webhook (
     notify  => Service['webhook'],
   }
 
-  file { '/etc/systemd/system/puppetmaster_webhook.service':
+  file { '/etc/systemd/system/webhook.service':
     ensure  => present,
     mode    => '0775',
     content => template('webhook/service.systemd.erb'),
