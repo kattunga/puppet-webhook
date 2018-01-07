@@ -103,7 +103,7 @@ class webhook (
   }
 
   exec { 'run_bundler':
-    command     => "${ruby_prefix}bundle install --path vendor/bundle",
+    command     => "/usr/local/rvm/wrappers/ruby-2.2.6/bundle install --path vendor/bundle",
     cwd         => $webhook_home,
     refreshonly => true,
   }
