@@ -67,6 +67,7 @@ class webhook (
   $repo_puppetfile = undef,
   $repo_hieradata  = undef,
   $ruby_dev        = 'ruby-dev',
+  @ruby_prefix     = '/usr/local/rvm/wrappers/ruby-2.2.6'
 ) {
 
   file { "${webhook_home}":
@@ -103,7 +104,7 @@ class webhook (
   }
 
   exec { 'run_bundler':
-    command     => "/usr/local/rvm/wrappers/ruby-2.2.6/bundle install --path vendor/bundle",
+    command     => "$ruby_path/bundle install --path vendor/bundle",
     cwd         => $webhook_home,
     refreshonly => true,
   }
