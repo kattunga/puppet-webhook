@@ -10,6 +10,10 @@ repo_hierdata   = "<%= @repo_hieradata %>"
 webhook_config_obj = JSON.parse(File.read((Dir.pwd) + "/webhook_config.json"))
 
 post '/payload' do
+
+  content = request.body.read
+  logger.info("#{content}")
+
   push = JSON.parse(request.body.read)
   logger.info("json payload: #{push.inspect}")
 
