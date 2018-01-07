@@ -128,27 +128,8 @@ class webhook (
     ensure  => present,
     mode    => '0775',
     content => template('webhook/service.systemd.erb'),
-    notify  => Exec['refresh_services'],
+    notify  => Service['webhook'],
   }
-
-  if ! defined(Package[$ruby_dev]) {
-    package { $ruby_dev:
-      ensure   => 'installed',
-    }
-  }
-
-#  bundler::install { $webhook_home:
-#    user       => $webhook_owner,
-#    group      => $webhook_group,
-#    deployment => false,
-#    without    => 'development test doc',
-#    require    => [
-#      File["${webhook_home}/config.ru"],
-#      File["${webhook_home}/Gemfile"],
-#      File["${webhook_home}/Gemfile.lock"],
-#      Package[$ruby_dev],
-#    ],
-#  }
 
   service { 'webhook':
     ensure     => running,
