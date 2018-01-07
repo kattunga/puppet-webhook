@@ -89,7 +89,7 @@ class webhook (
     owner   => $webhook_owner,
     group   => $webhook_group,
     mode    => '0644',
-    content => template('webhook/webhook_config.json.erb'),
+    source  => 'puppet:///modules/webhook/webhook_config.json'),
     notify  => Service['webhook'],
   }
 
@@ -98,17 +98,14 @@ class webhook (
     owner   => $webhook_owner,
     group   => $webhook_group,
     mode    => '0755',
-    source  => 'puppet:///modules/webhook/Gemfile',
-    #notify  => Bundler::Install[$webhook_home],
+    source  => 'puppet:///modules/webhook/Gemfile'),
+    notify  => Exec['run_bundler'],
   }
 
-  file { "${webhook_home}/Gemfile.lock":
-    ensure  => present,
-    owner   => $webhook_owner,
-    group   => $webhook_group,
-    mode    => '0755',
-    source  => 'puppet:///modules/webhook/Gemfile.lock',
-    #notify  => Bundler::Install[$webhook_home],
+  exec { 'run_bundler':
+    command     => "${ruby_prefix}bundle install --path vendor/bundle",
+    cwd         => $webhook_home,
+    refreshonly => true,
   }
 
   file { "${webhook_home}/log":
@@ -127,10 +124,11 @@ class webhook (
     notify  => Service['webhook'],
   }
 
-  file { '/etc/init.d/webhook':
+  file { '/etc/systemd/system/puppetmaster_webhook.service':
     ensure  => present,
     mode    => '0775',
-    content => template("webhook/service.systemd.erb"),
+    content => template('webhook/service.systemd.erb'),
+    notify  => Exec['refresh_services'],
   }
 
   if ! defined(Package[$ruby_dev]) {
@@ -139,28 +137,24 @@ class webhook (
     }
   }
 
-  bundler::install { $webhook_home:
-    user       => $webhook_owner,
-    group      => $webhook_group,
-    deployment => false,
-    without    => 'development test doc',
-    require    => [
-      File["${webhook_home}/config.ru"],
-      File["${webhook_home}/Gemfile"],
-      File["${webhook_home}/Gemfile.lock"],
-      Package[$ruby_dev],
-    ],
-  }
+#  bundler::install { $webhook_home:
+#    user       => $webhook_owner,
+#    group      => $webhook_group,
+#    deployment => false,
+#    without    => 'development test doc',
+#    require    => [
+#      File["${webhook_home}/config.ru"],
+#      File["${webhook_home}/Gemfile"],
+#      File["${webhook_home}/Gemfile.lock"],
+#      Package[$ruby_dev],
+#    ],
+#  }
 
   service { 'webhook':
     ensure     => running,
     hasstatus  => true,
     enable     => true,
     hasrestart => true,
-    require    => [
-      Bundler::Install[$webhook_home],
-      File["${webhook_home}/webhook.rb"],
-    ],
   }
 }
 
