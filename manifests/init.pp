@@ -68,12 +68,11 @@ class webhook (
   $ruby_dev        = $webhook::params::ruby_dev,
 ) inherits webhook::params {
 
-  $osfamily = inline_template('<%= osfamily.downcase %>')
-
-  exec { 'create_webhook_homedir':
-    command => "mkdir -p ${webhook_home}",
-    path    => '/bin:/usr/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/sbin',
-    creates => $webhook_home,
+  file { "${webhook_home}":
+    ensure  => directory,
+    owner   => $webhook_owner,
+    group   => $webhook_group,
+    mode    => '0755',
   }
 
   file { "${webhook_home}/config.ru":
@@ -82,7 +81,6 @@ class webhook (
     group   => $webhook_group,
     mode    => '0755',
     source  => 'puppet:///modules/webhook/config.ru',
-    require => Exec['create_webhook_homedir'],
   }
 
   file { "${webhook_home}/webhook_config.json":
@@ -91,7 +89,6 @@ class webhook (
     group   => $webhook_group,
     mode    => '0644',
     content => template('webhook/webhook_config.json.erb'),
-    require => Exec['create_webhook_homedir'],
     notify  => Service['webhook'],
   }
 
@@ -102,7 +99,6 @@ class webhook (
     mode    => '0755',
     source  => 'puppet:///modules/webhook/Gemfile',
     #notify  => Bundler::Install[$webhook_home],
-    require => Exec['create_webhook_homedir'],
   }
 
   file { "${webhook_home}/Gemfile.lock":
@@ -112,7 +108,6 @@ class webhook (
     mode    => '0755',
     source  => 'puppet:///modules/webhook/Gemfile.lock',
     #notify  => Bundler::Install[$webhook_home],
-    require => Exec['create_webhook_homedir'],
   }
 
   file { "${webhook_home}/log":
@@ -120,7 +115,6 @@ class webhook (
     owner   => $webhook_owner,
     group   => $webhook_group,
     mode    => '0755',
-    require => Exec['create_webhook_homedir'],
   }
 
   file { "${webhook_home}/webhook.rb":
@@ -128,7 +122,6 @@ class webhook (
     owner   => $webhook_owner,
     group   => $webhook_group,
     mode    => '0755',
-    require => Exec['create_webhook_homedir'],
     content => template('webhook/webhook.rb'),
     notify  => Service['webhook'],
   }
