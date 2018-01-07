@@ -89,7 +89,7 @@ class webhook (
     owner   => $webhook_owner,
     group   => $webhook_group,
     mode    => '0644',
-    source  => 'puppet:///modules/webhook/webhook_config.json'),
+    source  => 'puppet:///modules/webhook/webhook_config.json',
     notify  => Service['webhook'],
   }
 
@@ -98,7 +98,7 @@ class webhook (
     owner   => $webhook_owner,
     group   => $webhook_group,
     mode    => '0755',
-    source  => 'puppet:///modules/webhook/Gemfile'),
+    source  => 'puppet:///modules/webhook/Gemfile',
     notify  => Exec['run_bundler'],
   }
 
