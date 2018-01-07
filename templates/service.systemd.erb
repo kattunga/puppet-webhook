@@ -1,0 +1,27 @@
+[Unit]
+Description=Puppet Webhook Service
+After=network.target
+
+[Service]
+# Foreground process (do not use --daemon in ExecStart or config.rb)
+Type=simple
+
+# Preferably configure a non-privileged user
+User=<%= @webhook_owner %>
+
+# Specify the path to your puma application root
+WorkingDirectory=<%= @webhook_home %>
+
+# Helpful for debugging socket activation, etc.
+# Environment=PUMA_DEBUG=1
+
+# The command to start Puma
+# Here we are using a binstub generated via:
+# `bundle binstubs puma --path ./sbin`
+# in the WorkingDirectory (replace <WD> below)
+# You can alternatively use `bundle exec --keep-file-descriptors puma`
+ExecStart=<%= @ruby_prefix %>bundle exec puma --environment production --bind tcp://<%= @webhook_bind %>:<%= @webhook_port %> --pidfile /var/run/webhook_puma.pid
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

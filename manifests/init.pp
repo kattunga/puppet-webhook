@@ -43,7 +43,7 @@
 # === Example
 #
 #  class { 'webhook':
-#    webhook_port    => '82',
+#    webhook_port    => '8088',
 #    repo_puppetfile => "puppetfilerepo",
 #    repo_hieradata  => "puppethieradata",
 #  }
@@ -57,16 +57,17 @@
 # Copyright 2014 Werner Dijkerman
 #
 class webhook (
-  $webhook_home    = $webhook::params::homedir,
-  $webhook_port    = $webhook::params::port,
-  $webhook_owner   = $webhook::params::owner,
-  $webhook_group   = $webhook::params::group,
-  $mco             = $webhook::params::mco,
-  $mco_user        = $webhook::params::mco_user,
+  $webhook_home    = '/opt/webhook',
+  $webhook_bind    = '0.0.0.0',
+  $webhook_port    = '8088',
+  $webhook_owner   = 'root',
+  $webhook_group   = 'root',
+  $mco             = false,
+  $mco_user        = 'mcollective-user',
   $repo_puppetfile = undef,
   $repo_hieradata  = undef,
-  $ruby_dev        = $webhook::params::ruby_dev,
-) inherits webhook::params {
+  $ruby_dev        = 'ruby-dev',
+) {
 
   file { "${webhook_home}":
     ensure  => directory,
@@ -129,7 +130,7 @@ class webhook (
   file { '/etc/init.d/webhook':
     ensure  => present,
     mode    => '0775',
-    content => template("webhook/service.${osfamily}.erb"),
+    content => template("webhook/service.systemd.erb"),
   }
 
   if ! defined(Package[$ruby_dev]) {
